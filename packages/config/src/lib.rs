@@ -1,54 +1,59 @@
-use serde::{Deserialize, Serialize};
-use toml::de::Error;
+mod file;
+
+use std::fmt;
+use serde::Deserialize;
 use toml::value::{Table, Value};
 
-#[derive(Serialize, Deserialize, PartialEq, Debug)]
-#[serde(rename_all = "lowercase")]
-pub enum InputType {
-    Stdin,
-    Http,
+#[derive(Deserialize)]
+pub struct ParseError;
+
+impl fmt::Debug for ParseError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "config: ERROR: Unable to parse config. Please ensure the specified file exists, and is valid TOML.")
+    }
 }
 
-#[derive(Serialize, Deserialize, PartialEq, Debug)]
-#[serde(rename_all = "lowercase")]
-pub enum OutputType {
-    Stdout,
+impl fmt::Display for ParseError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "config: ERROR: Unable to parse config. Please ensure the specified file exists, and is valid TOML.")
+    }
 }
 
 #[derive(Deserialize)]
 pub struct Config {
-    pipeline: Vec<Pipeline>,
+    pub core: Core,
+    pub pipeline: Vec<Pipeline>,
+}
+
+#[derive(Deserialize)]
+pub struct Core {
+    pub input_plugins: Vec<String>,
 }
 
 #[derive(Deserialize)]
 pub struct Pipeline {
-    name: String,
-    path: String,
-    inputs: Vec<Input>,
-    outputs: Vec<Output>,
+    pub name: String,
+    pub path: String,
 }
 
-#[derive(Deserialize)]
-pub struct Input {
-    name: String,
-    kind: InputType,
-    options: Option<Table>,
+pub fn get_config() -> Result<Config, ParseError> {
+    match file::load_config("../logsmith.toml".to_string()) {
+        Ok(contents) => parse_config(contents),
+        Err(err) => {
+            println!("config: ERROR: {}", err);
+            Err(ParseError {})
+        }
+    }
 }
 
-#[derive(Deserialize)]
-pub struct Output {
-    name: String,
-    kind: OutputType,
-}
-
-// fn load_config() {
-//     let contents = load_config()?;
-//     let config = parse_config(contents)?;
-
-// }
-
-pub fn parse_config(contents: String) -> Result<Config, Error> {
-    toml::from_str(&contents)
+fn parse_config(contents: String) -> Result<Config, ParseError> {
+    match toml::from_str::<Config>(&contents) {
+        Ok(config) => Ok(config),
+        Err(err) => {
+            println!("config: ERROR: {}", err);
+            Err(ParseError {})
+        }
+    }
 }
 
 #[cfg(test)]
@@ -59,51 +64,42 @@ mod tests {
     #[test]
     fn can_parse_config() {
         let contents = r#"
-            [[pipeline]]
-            name = "test-pipeline"
-            path = "./test.pipeline.toml"
-            
-                # This pipeline will combine two inputs, stdin, and http.
-                # Pass them through pipeline.toml, and into one output stdout
-                [[pipeline.inputs]]
-                name = "stdin-input"
-                kind = "stdin"
-                
-                [[pipeline.inputs]]
-                name = "http-input"
-                kind = "http"
-                options = { port = 8080 }
-                
-                [[pipeline.outputs]]
-                name = "stdout-output"
-                kind = "stdout"
+        [core]
+        input_plugins = [
+            "./plugins/libinput_stdin.dylib"
+        ]
+
+        [[pipeline]]
+        name = "test-pipeline"
+        path = "./test.pipeline.toml"
         "#;
 
-        let config = parse_config(contents.to_string()).unwrap();
-        let pipeline = &config.pipeline[0];
+        let cnf = parse_config(contents.to_string()).unwrap();
+
+        let pipeline = &cnf.pipeline[0];
 
         assert_eq!(pipeline.name, "test-pipeline");
         assert_eq!(pipeline.path, "./test.pipeline.toml");
 
-        let first_input = &pipeline.inputs[0];
-        let second_input = &pipeline.inputs[1];
+        // let first_input = &pipeline.inputs[0];
+        // let second_input = &pipeline.inputs[1];
 
-        assert_eq!(first_input.name, "stdin-input");
-        assert_eq!(first_input.kind, InputType::Stdin);
+        // assert_eq!(first_input.get("name").unwrap(), Value::String("stdin-input".to_string()));
+        // assert_eq!(first_input.get("kind"), "stdin");
 
-        assert_eq!(second_input.name, "http-input");
-        assert_eq!(second_input.kind, InputType::Http);
+        // assert_eq!(second_input["name"], "http-input");
+        // assert_eq!(second_input["kind"], "http");
 
-        // Options is stored as a BTreeMap, as they can vary
-        // per input type.
-        let mut options = BTreeMap::new();
-        options.insert("port".to_string(), Value::Integer(8080));
+        // // Options is stored as a BTreeMap, as they can vary
+        // // per input type.
+        // let mut options = BTreeMap::new();
+        // options.insert("port".to_string(), Value::Integer(8080));
 
-        assert_eq!(second_input.options, Some(options));
+        // assert_eq!(second_input.options, Some(options));
 
-        let first_output = &pipeline.outputs[0];
+        // let first_output = &pipeline.outputs[0];
 
-        assert_eq!(first_output.name, "stdout-output");
-        assert_eq!(first_output.kind, OutputType::Stdout);
+        // assert_eq!(first_output.name, "stdout-output");
+        // assert_eq!(first_output.kind, OutputType::Stdout);
     }
 }

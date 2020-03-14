@@ -10,6 +10,7 @@
 - Outputs (use common plugin interface)
     - Stdout
 
+- https://zicklag.github.io/rust-tutorials/rust-plugins.html
 - https://github.com/Geal/nom
 
 ## License

@@ -6,4 +6,9 @@ edition = "2018"
 license = "GNU General Public License v3.0"
 
 [dependencies]
-logsmith-app = { path = "../packages/app" }
+dlopen = "0.1.6"
+dlopen_derive = "0.1.3"
+config = { path = "../packages/config" }
+
+[lib]
+crate-type = ["dylib", "rlib"]

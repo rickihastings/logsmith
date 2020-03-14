@@ -1,5 +1,5 @@
 [package]
-name = "logsmith-config"
+name = "config"
 version = "0.1.0"
 authors = ["Ricki Hastings <rickihastings22@gmail.com>"]
 edition = "2018"

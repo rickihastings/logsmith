@@ -5,8 +5,8 @@ authors = ["Ricki Hastings <rickihastings22@gmail.com>"]
 edition = "2018"
 license = "GNU General Public License v3.0"
 
+[dependencies]
+config = { path = "../../packages/config" }
+
 [lib]
 crate-type = ["dylib"]
-
-[dependencies]
-logsmith-app = { path = "../packages/app" }

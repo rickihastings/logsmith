@@ -1,2 +1,3 @@
+logsmith/plugins/*.dylib
 target
 logsmith.toml

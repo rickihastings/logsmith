@@ -1,27 +1,27 @@
-extern crate app;
+extern crate logsmith;
 
-use app::Plugin;
+use logsmith::input_plugin::InputPlugin;
+use config::Config;
 
-// Our plugin implementation
-struct Plugin1;
+struct InputStdin;
 
-impl Plugin for Plugin1 {
-    fn handle_command(&self, command: &str) {
-        // Handle the `plugin1` command
-        if command == "plugin1" {
-            println!("Hey you triggered my 'plugin1' command!");
-
-        // Handle an `echo` command
-        } else if command.starts_with("echo ") {
-            println!("Echo-ing what you said: {}", command);
-        }
+impl InputPlugin for InputStdin {
+    fn validate_config(&self, config: Config) -> bool {
+        return true
     }
 }
 
 #[no_mangle]
-pub fn get_plugin() -> *mut Plugin {
-    println!("Running plugin1");
+pub fn get_name() -> &'static str {
+    "InputStdin"
+}
 
-    // Return a raw pointer to an instance of our plugin
-    Box::into_raw(Box::new(Plugin1 {}))
+#[no_mangle]
+pub fn get_version() -> &'static str {
+    env!("CARGO_PKG_VERSION")
+}
+
+#[no_mangle]
+pub fn get_plugin() -> *mut dyn InputPlugin {
+    Box::into_raw(Box::new(InputStdin {}))
 }
