@@ -1,10 +1,9 @@
 [package]
-name = "logsmith-config"
+name = "logsmith"
 version = "0.1.0"
 authors = ["Ricki Hastings <rickihastings22@gmail.com>"]
 edition = "2018"
 license = "GNU General Public License v3.0"
 
 [dependencies]
-serde = { version = "1.0", features = ["derive"] }
-toml = "0.4.2"
+logsmith-app = { path = "../packages/app" }

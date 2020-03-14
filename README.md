@@ -10,6 +10,8 @@
 - Outputs (use common plugin interface)
     - Stdout
 
+- https://github.com/Geal/nom
+
 ## License
 
 [GNU General Public License v3.0](LICENSE)

@@ -1,6 +1,6 @@
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 use toml::de::Error;
-use toml::value::{Value, Table};
+use toml::value::{Table, Value};
 
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
 #[serde(rename_all = "lowercase")]
@@ -81,7 +81,7 @@ mod tests {
 
         let config = parse_config(contents.to_string()).unwrap();
         let pipeline = &config.pipeline[0];
-        
+
         assert_eq!(pipeline.name, "test-pipeline");
         assert_eq!(pipeline.path, "./test.pipeline.toml");
 

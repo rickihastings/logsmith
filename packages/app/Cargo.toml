@@ -1,10 +1,13 @@
 [package]
-name = "logsmith-config"
+name = "logsmith-app"
 version = "0.1.0"
 authors = ["Ricki Hastings <rickihastings22@gmail.com>"]
 edition = "2018"
 license = "GNU General Public License v3.0"
 
+[lib]
+crate-type = ["dylib", "rlib"]
+
 [dependencies]
-serde = { version = "1.0", features = ["derive"] }
-toml = "0.4.2"
+dlopen = "0.1.6"
+dlopen_derive = "0.1.3"
