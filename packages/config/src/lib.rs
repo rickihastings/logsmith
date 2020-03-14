@@ -5,35 +5,52 @@ use serde::Deserialize;
 use toml::value::{Table, Value};
 
 #[derive(Deserialize)]
-pub struct ParseError;
+pub struct ParseError {
+    error: &'static str,
+}
+
+impl ParseError {
+    pub fn new(error: &'static str) -> Self {
+        Self { error }
+    }
+}
 
 impl fmt::Debug for ParseError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "config: ERROR: Unable to parse config. Please ensure the specified file exists, and is valid TOML.")
+        write!(f, "config: ERROR: Unable to parse config. {}", self.error)
     }
 }
 
 impl fmt::Display for ParseError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "config: ERROR: Unable to parse config. Please ensure the specified file exists, and is valid TOML.")
+        write!(f, "config: ERROR: Unable to parse config. {}", self.error)
     }
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct Config {
     pub core: Core,
     pub pipeline: Vec<Pipeline>,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct Core {
     pub input_plugins: Vec<String>,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct Pipeline {
     pub name: String,
     pub path: String,
+    pub inputs: Vec<Input>,
+    pub outputs: Vec<Table>,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct Input {
+    pub name: String,
+    pub kind: String,
+    pub options: Option<Table>,
 }
 
 pub fn get_config() -> Result<Config, ParseError> {
@@ -41,7 +58,7 @@ pub fn get_config() -> Result<Config, ParseError> {
         Ok(contents) => parse_config(contents),
         Err(err) => {
             println!("config: ERROR: {}", err);
-            Err(ParseError {})
+            Err(ParseError::new("Please ensure the specified file exists, and is valid TOML."))
         }
     }
 }
@@ -51,7 +68,7 @@ fn parse_config(contents: String) -> Result<Config, ParseError> {
         Ok(config) => Ok(config),
         Err(err) => {
             println!("config: ERROR: {}", err);
-            Err(ParseError {})
+            Err(ParseError::new("Please ensure the specified file exists, and is valid TOML."))
         }
     }
 }

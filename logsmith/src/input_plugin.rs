@@ -1,8 +1,8 @@
 use dlopen::wrapper::WrapperApi;
-use config::Config;
+use config::{Config, ParseError};
 
 pub trait InputPlugin {
-    fn validate_config(&self, config: Config) -> bool;
+    fn validate_config(&self, config: &Config) -> Option<ParseError>;
 }
 
 #[derive(WrapperApi)]

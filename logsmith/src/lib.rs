@@ -34,5 +34,7 @@ fn load_input_plugins(cnf: &Config) {
         let plugin = unsafe { Box::from_raw(plugin_wrapper.get_plugin()) };
 
         println!("core: INFO: Loaded {} plugin {}", plugin_wrapper.get_name(), plugin_wrapper.get_version());
+
+        plugin.validate_config(&cnf);
     }
 }
