@@ -1,27 +1,6 @@
 extern crate logsmith;
 
-use logsmith::input_plugin::InputPlugin;
-use config::{Config, ParseError};
-
-struct InputStdin;
-
-impl InputPlugin for InputStdin {
-    fn validate_config(&self, cnf: &Config) -> Option<ParseError> {
-        println!("{:#?}", cnf);
-
-        // Each pipeline should have inputs, ensure any stdin inputs are correct here.
-        // @todo - check unique name
-        for pipeline in &cnf.pipeline {
-            for input in &pipeline.inputs {
-                if input.kind == "stdin" && input.name != "" {
-                    return Some(ParseError::new("stdin kind must have a name"));
-                }
-            }
-        }
-
-        None
-    }
-}
+use logsmith::config::{Config, ParseError};
 
 #[no_mangle]
 pub fn get_name() -> &'static str {
@@ -34,6 +13,27 @@ pub fn get_version() -> &'static str {
 }
 
 #[no_mangle]
-pub fn get_plugin() -> *mut dyn InputPlugin {
-    Box::into_raw(Box::new(InputStdin {}))
+pub fn validate_config(cnf: Config) -> Option<ParseError> {
+    // Each pipeline should have inputs, ensure any stdin inputs are correct here.
+    for pipeline in &cnf.pipeline {
+        let mut names: Vec<String> = Vec::new();
+
+        for input in &pipeline.inputs {
+            if input.kind == "stdin" {
+                if input.kind == "stdin" && input.name == "" {
+                    return Some(ParseError::new("stdin kind must have a name"));
+                }
+
+                if names.contains(&input.name) {
+                    return Some(ParseError::new("stdin kind must have a unique name"));
+                }
+
+                names.push(input.name.clone());
+            }
+        }
+    }
+
+    println!("{:#?}", cnf);
+
+    None
 }

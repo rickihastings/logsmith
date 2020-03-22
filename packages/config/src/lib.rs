@@ -4,7 +4,7 @@ use std::fmt;
 use serde::Deserialize;
 use toml::value::{Table, Value};
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone)]
 pub struct ParseError {
     error: &'static str,
 }
@@ -27,18 +27,18 @@ impl fmt::Display for ParseError {
     }
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct Config {
     pub core: Core,
     pub pipeline: Vec<Pipeline>,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct Core {
     pub input_plugins: Vec<String>,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct Pipeline {
     pub name: String,
     pub path: String,
@@ -46,7 +46,7 @@ pub struct Pipeline {
     pub outputs: Vec<Table>,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct Input {
     pub name: String,
     pub kind: String,
@@ -54,7 +54,7 @@ pub struct Input {
 }
 
 pub fn get_config() -> Result<Config, ParseError> {
-    match file::load_config("../logsmith.toml".to_string()) {
+    match file::load_config("./logsmith.toml".to_string()) {
         Ok(contents) => parse_config(contents),
         Err(err) => {
             println!("config: ERROR: {}", err);

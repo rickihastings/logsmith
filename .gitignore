@@ -1,3 +1,4 @@
-logsmith/plugins/*.dylib
+plugins/*.dylib
 target
 logsmith.toml
+*.code-workspace

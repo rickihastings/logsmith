@@ -1,3 +1,3 @@
 fn main() {
-    logsmith::run();
+    logsmith::App::new().run();
 }
